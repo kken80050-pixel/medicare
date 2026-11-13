@@ -82,12 +82,16 @@ return <div className="medicare-dashboard">
     <button type = "button" className = {view === 'branches' ? 'active' : ''} onClick = {() => setView('branches')}><MapPin size = {15} /> Clinic Branches</button>
     <button type="button" className={view === 'doctors' ? 'active' : ''} onClick={() => setView('doctors')}><Stethoscope size={15} /> Doctors</button>
     </nav>
-    <div className = "dash-profile">
-      <strong>Profile</strong>
-      <span>Name: {user?.name}</span>
-      <span>Email: {user?.email}</span>
-        {(user?.phone || contact) && <span>Contact: {user?.phone || contact}</span>}
-        <button type="button" className="dash-outline" onClick={() => setEditing(true)}><Pencil size={13} /> Edit Profile</button>
+    <div className="dash-profile">
+      <div className="profile-head">
+        <span className="profile-avatar" aria-hidden="true">{(user?.name ?? '?').charAt(0).toUpperCase()}</span>
+        <div className="profile-id">
+          <strong>{user?.name}</strong>
+          <span title={user?.email}>{user?.email}</span>
+        </div>
+      </div>
+      {contact && <div className="profile-row"><Phone size={13} /> {contact}</div>}
+      <button type="button" className="dash-outline" onClick={() => setEditing(true)}><Pencil size={13} /> Edit Profile</button>
       <button type = "button" className = "dash-logout" onClick = {() => setAskLogout(true)}>Log Out</button>
     </div>
   </aside>
