@@ -4,7 +4,8 @@ import { CalendarDays, MapPin, Clock, Phone, Plus, Stethoscope, Pencil } from 'l
 import { useAuth } from './AuthContext';
 import { useBranches } from './BranchProvide';
 import type { Branch } from './BranchesData';
-import { doctors } from './DoctorData';
+import { fetchDoctors } from './doctorstorage';
+import type { Doctor } from './doctorstorage';
 import { ProfileModal } from './Profile';
 import { cancelAppointment, fetchMyAppointments, fromDateKey, formatDay, statusOf } from './AppointmentsStore';
 import type { Appointment } from './AppointmentsStore';
@@ -30,6 +31,14 @@ useEffect(() => {
     .catch(() => setAppointments([]));
 }, []);
 
+const [doctors, setDoctors] = useState<Doctor[]>([]);
+
+useEffect(() => {
+  fetchDoctors()
+    .then(setDoctors)
+    .catch(() => setDoctors([]));
+}, []);
+
 const pendingList = appointments
   .filter(item => ['Requested', 'Upcoming'].includes(statusOf(item)))
   .sort((a, b) => fromDateKey(a.dateKey).getTime() - fromDateKey(b.dateKey).getTime());
@@ -52,7 +61,7 @@ const confirmCancel = async () => {
   setToCancel(null);
 };
 
-const visibleDoctors = doctors.filter(item => doctorBranch === 'all' || item.branchId === doctorBranch);
+const visibleDoctors = doctors.filter(item => item.active && (doctorBranch === 'all' || item.branchId === doctorBranch));
 const contact = user?.phone || appointments.filter(item => item.phone).slice(-1)[0]?.phone;
 
 const reschedule = (item: Appointment) => setToReschedule(item);
