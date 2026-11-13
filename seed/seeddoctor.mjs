@@ -10,7 +10,7 @@ const db = getFirestore();
 const doctors =[
     { 
     id: 'd1', 
-    name: 'Dr. Maria Santos', 
+    name: 'Dr. Miguel Angelo Santos', 
     specialty: 'General Practitioner', 
     branchId: 'calamba', 
     days: 'Mon, Wed, Fri' 
@@ -18,7 +18,7 @@ const doctors =[
   
   { 
     id: 'd2', 
-    name: 'Dr. Jose Reyes', 
+    name: 'Dr. Andrea Nicole Reyes', 
     specialty: 'Internal Medicine', 
     branchId: 'calamba', 
     days: 'Tue, Thu' 
@@ -26,7 +26,7 @@ const doctors =[
 
   { 
     id: 'd3', 
-    name: 'Dr. Ana Cruz', 
+    name: 'Dr. Samantha Louise Navarro', 
     specialty: 'General Practitioner', 
     branchId: 'santa-rosa', 
     days: 'Mon to Sat' 
@@ -34,7 +34,7 @@ const doctors =[
 
   { 
     id: 'd4', 
-    name: 'Dr. Paolo Garcia', 
+    name: 'Dr. Nathaniel Flores', 
     specialty: 'Family Medicine', 
     branchId: 'cabanatuan', 
     days: 'Mon, Thu, Fri' 
@@ -42,7 +42,7 @@ const doctors =[
 
   { 
     id: 'd5', 
-    name: 'Dr. Liza Mendoza', 
+    name: 'Dr. Mark Joseph Dela Cruz', 
     specialty: 'Pediatrics', 
     branchId: 'san-fernando', 
     days: 'Mon to Fri' 
@@ -50,7 +50,7 @@ const doctors =[
 
   { 
     id: 'd6', 
-    name: 'Dr. Carlo Bautista', 
+    name: 'Dr. Jasmine Mercado', 
     specialty: 'General Practitioner', 
     branchId: 'san-jose', 
     days: 'Mon, Wed' 
@@ -58,7 +58,7 @@ const doctors =[
 
   { 
     id: 'd7', 
-    name: 'Dr. Rina Flores', 
+    name: 'Dr. Enrico Pascual', 
     specialty: 'Pediatrician', 
     branchId: 'tarlac-city', 
     days: 'Weekdays' 
@@ -66,7 +66,7 @@ const doctors =[
 
   { 
     id: 'd8', 
-    name: 'Dr. Miguel Torres', 
+    name: 'Dr. Katrina Dominguez', 
     specialty: 'Vaccination and Wound Care', 
     branchId: 'san-jose',
     days: 'Tue to Sun' 
