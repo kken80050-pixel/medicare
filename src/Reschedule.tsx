@@ -119,8 +119,7 @@ export function Reschedule({ appointment, onClose, onDone }: RescheduleProp) {
               >{selectedSlot === slot.label && <Check size={12} />} {slot.label}</button>)}
           </div>
         </div>
-
-        <p className = "reschedule-note">New request goes directly to the clinic for approval and your current appointment will be automcatically cancelled.</p>
+        
         {error && <p className = "reschedule-error" role="alert">{error}</p>}
         <div className = "reschedule-actions">
           <button type = "button" className = "dash-outline" onClick = {onClose}>Close</button>
