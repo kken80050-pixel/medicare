@@ -22,54 +22,6 @@ const doctors =[
     specialty: 'Internal Medicine', 
     branchId: 'calamba', 
     days: 'Tue, Thu' 
-  },
-
-  { 
-    id: 'd3', 
-    name: 'Dr. Samantha Louise Navarro', 
-    specialty: 'General Practitioner', 
-    branchId: 'santa-rosa', 
-    days: 'Mon to Sat' 
-  },
-
-  { 
-    id: 'd4', 
-    name: 'Dr. Nathaniel Flores', 
-    specialty: 'Family Medicine', 
-    branchId: 'cabanatuan', 
-    days: 'Mon, Thu, Fri' 
-  },
-
-  { 
-    id: 'd5', 
-    name: 'Dr. Mark Joseph Dela Cruz', 
-    specialty: 'Pediatrics', 
-    branchId: 'san-fernando', 
-    days: 'Mon to Fri' 
-  },
-
-  { 
-    id: 'd6', 
-    name: 'Dr. Jasmine Mercado', 
-    specialty: 'General Practitioner', 
-    branchId: 'san-jose', 
-    days: 'Mon, Wed' 
-  },
-
-  { 
-    id: 'd7', 
-    name: 'Dr. Enrico Pascual', 
-    specialty: 'Pediatrician', 
-    branchId: 'tarlac-city', 
-    days: 'Weekdays' 
-  },
-
-  { 
-    id: 'd8', 
-    name: 'Dr. Katrina Dominguez', 
-    specialty: 'Vaccination and Wound Care', 
-    branchId: 'san-jose',
-    days: 'Tue to Sun' 
   }
 ];
 
