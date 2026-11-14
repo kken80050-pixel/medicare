@@ -103,7 +103,7 @@ return <div className="medicare-dashboard">
     {view === 'appointments' ? <>
     <div className = "dash-top">
       <h1>Welcome back, {user?.name}</h1>
-      <button type = "button" className = "dash-primary" disabled={atLimit} onClick={() => navigate('/book')}>+ Book an Appointment</button>
+      <button type = "button" className = "dash-primary" disabled={atLimit} onClick={() => navigate('/book')}>Book an Appointment</button>
     </div>
   {atLimit && <p className="dash-limit">You have {waitingCount} appointment requests waiting for approval. You can book once again when the clinic approves your existing appointment.</p>}
 
