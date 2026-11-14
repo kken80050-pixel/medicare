@@ -7,11 +7,12 @@ import type { Branch } from './BranchesData';
 import { fetchDoctors } from './doctorstorage';
 import type { Doctor } from './doctorstorage';
 import { ProfileModal } from './Profile';
-import { cancelAppointment, fetchMyAppointments, fromDateKey, formatDay, statusOf } from './AppointmentsStore';
+import { cancelAppointment, fetchMyAppointments, fromDateKey, formatDay, statusOf, MAX_PENDING } from './AppointmentsStore';
 import type { Appointment } from './AppointmentsStore';
 import './Dashboard.css';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Reschedule } from './Reschedule';
+
 
 export function Dashboard() {
 const navigate = useNavigate();
@@ -44,11 +45,14 @@ const pendingList = appointments
   .sort((a, b) => fromDateKey(a.dateKey).getTime() - fromDateKey(b.dateKey).getTime());
 
 const nextAppointment = pendingList[0];
-const otherUpcoming = pendingList.slice(1);
+const otherUpcoming = pendingList;
 
 const history = appointments
   .filter(item => !['Requested', 'Upcoming'].includes(statusOf(item)))
   .sort((a, b) => fromDateKey(b.dateKey).getTime() - fromDateKey(a.dateKey).getTime());
+  
+const waitingCount = appointments.filter(item => statusOf(item) === 'Requested').length;
+const atLimit = waitingCount >= MAX_PENDING;
 
 const confirmCancel = async () => {
   if (!toCancel) return;
@@ -56,7 +60,7 @@ const confirmCancel = async () => {
     await cancelAppointment(toCancel.reference);
     setAppointments(await fetchMyAppointments());
   } catch {
-    window.alert('Could not cancel the appointment. Please try again.');
+    window.alert('Could not cancel the appointment');
   }
   setToCancel(null);
 };
@@ -100,8 +104,9 @@ return <div className="medicare-dashboard">
     {view === 'appointments' ? <>
     <div className = "dash-top">
       <h1>Welcome back, {user?.name}</h1>
-      <button type = "button" className = "dash-primary" onClick={() => navigate('/book')}>+ Book an Appointment</button>
+      <button type = "button" className = "dash-primary" disabled={atLimit} onClick={() => navigate('/book')}>+ Book an Appointment</button>
     </div>
+  {atLimit && <p className="dash-limit">You have {waitingCount} appointment requests waiting for approval. You can book once again when the clinic approves your existing appointment.</p>}
 
 {nextAppointment ? <section className="dash-upcoming">
     <div className="dash-upcoming-head">
@@ -175,7 +180,7 @@ return <div className="medicare-dashboard">
       <li><Phone size = {14} /> {branch.phone}</li>
       <li><Clock size = {14} /> {branch.hours}</li>
       </ul>
-      <button type = "button" className = "dash-primary" onClick = {() => bookAt(branch)}>Book at This Branch</button>
+      <button type = "button" className = "dash-primary" disabled={atLimit} onClick = {() => bookAt(branch)}>Book at This Branch</button>
         </article>)}
         </div>
       </> : <>
@@ -197,7 +202,7 @@ return <div className="medicare-dashboard">
             <li><MapPin size={14} /> {branch.name}</li>
             <li><Clock size={14} /> {doctor.days}</li>
           </ul>
-          <button type="button" className="dash-primary" onClick={() => navigate('/book', { state: { branch, doctor } })}>Book with this Doctor</button>
+          <button type="button" className="dash-primary" disabled={atLimit} onClick={() => navigate('/book', { state: { branch, doctor } })}>Book with this Doctor</button>
         </article>;
     })}
   </div>
@@ -217,7 +222,12 @@ return <div className="medicare-dashboard">
     confirmLabel="Cancel appointment"
     cancelLabel="Keep appointment"
     onConfirm={confirmCancel}
-    onCancel={() => setToCancel(null)} > {toCancel && <> Ref <strong>#{toCancel.reference}</strong> on <strong>{formatDay(toCancel.dateKey, 'long')}</strong> at <strong>{toCancel.slot}</strong>. This can't be undone.</>}</ConfirmDialog>
+    onCancel={() => setToCancel(null)}>{toCancel && <div className="cancel-details">
+      <p><span>Ref</span><strong>#{toCancel.reference}</strong></p>
+      <p><span>Date</span><strong>{formatDay(toCancel.dateKey, 'long')}</strong></p>
+      <p><span>Time</span><strong>{toCancel.slot}</strong></p>
+      <p className="cancel-warning">This can't be undone.</p>
+    </div>}</ConfirmDialog>
   <ConfirmDialog
     open={askLogout}
     title="Log out of MediCare?"

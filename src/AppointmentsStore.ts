@@ -5,6 +5,8 @@ import { auth, db } from './firebase';
 import { ApiError } from './api';
 import { fetchSlots, slotKeyOf } from './ScheduleStore';
 
+export const MAX_PENDING = 2;
+
 export type AppointmentStatus = 'Upcoming' | 'Completed' | 'Cancelled' | 'Requested';
 
 export interface Appointment {
@@ -21,6 +23,8 @@ export interface Appointment {
   reason: string;
   status: AppointmentStatus;
   createdAt: number;
+  rescheduleReason: string;
+  rescheduledFrom: string;
 }
 
 export interface NewAppointment {
@@ -32,6 +36,7 @@ export interface NewAppointment {
   phone: string;
   reason: string;
   rescheduleReference?: string;
+  rescheduleReason?: string;
 }
 
 function toAppointment(id: string, data: DocumentData): Appointment {
@@ -48,7 +53,9 @@ function toAppointment(id: string, data: DocumentData): Appointment {
     phone: data.phone,
     reason: data.reason ?? '',
     status: data.status,
-    createdAt: typeof data.createdAt?.toMillis === 'function' ? data.createdAt.toMillis() : Date.now()
+    createdAt: typeof data.createdAt?.toMillis === 'function' ? data.createdAt.toMillis() : Date.now(),
+    rescheduleReason: data.rescheduleReason ?? '',
+    rescheduledFrom: data.rescheduledFrom ?? '',
   };
 }
 
@@ -84,6 +91,13 @@ export async function fetchAppointment(reference: string) {
   return toAppointment(snapshot.id, snapshot.data());
 }
 
+export async function countPending() {
+  const user = requireUser();
+  const snapshot = await getDocs(query(collection(db, 'appointments'), where('uid', '==', user.uid), where('status', '==', 'Requested')));
+  const today = toDateKey(new Date());
+  return snapshot.docs.filter(item => (item.data().dateKey as string) >= today).length;
+}
+
 export async function createAppointment(request: NewAppointment) {
   const user = requireUser();
 
@@ -95,6 +109,10 @@ export async function createAppointment(request: NewAppointment) {
 
   const phone = request.phone.replace(/\D/g, '');
   if (phone.length < 10 || phone.length > 11) throw new ApiError('Contact number must be 10 to 11 digits.', 400);
+
+  if (request.rescheduleReference && !request.rescheduleReason?.trim()) {
+  throw new ApiError('Please tell us why you are rescheduling.', 400);
+  }
 
   const slots = await fetchSlots(request.branchId, request.dateKey);
   if (!slots.some(item => item.label === request.slot && item.state === 'available')) {
@@ -108,6 +126,12 @@ export async function createAppointment(request: NewAppointment) {
           if (previousSnapshot.exists() && previousSnapshot.data().uid === user.uid && ['Requested', 'Upcoming'].includes(previousSnapshot.data().status)) {
       previous = toAppointment(previousSnapshot.id, previousSnapshot.data());
     }
+  }
+
+  const waiting = await countPending();
+  const replacing = previous && previous.status === 'Requested' ? 1 : 0;
+  if (waiting - replacing >= MAX_PENDING) {
+    throw new ApiError(`You already have ${MAX_PENDING} appointment requests waiting for approval. You can book again once the clinic approves one.`, 429);
   }
 
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -134,7 +158,8 @@ export async function createAppointment(request: NewAppointment) {
       phone,
       reason: request.reason.trim(),
       status: 'Requested',
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      ...(previous ? { rescheduleReason: (request.rescheduleReason ?? '').trim(), rescheduledFrom: previous.reference } : {})
     });
 
     batch.set(doc(db, 'slots', slotId), {

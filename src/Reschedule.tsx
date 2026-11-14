@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, ArrowLeft } from 'lucide-react';
 import { ApiError } from './api';
 import { createAppointment, formatDay, toDateKey } from './AppointmentsStore';
 import type { Appointment } from './AppointmentsStore';
 import { fetchSlots } from './ScheduleStore';
 import type { Slot } from './ScheduleStore';
 
-interface RescheduleProp {
+interface RescheduleProps {
   appointment: Appointment;
   onClose: () => void;
   onDone: () => void;
@@ -26,12 +26,14 @@ function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-export function Reschedule({ appointment, onClose, onDone }: RescheduleProp) {
+export function Reschedule({ appointment, onClose, onDone }: RescheduleProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   const lastMonth = new Date(today.getFullYear(), today.getMonth() + 6, 1);
 
+  const [step, setStep] = useState<'reason' | 'pick'>('reason');
+  const [reason, setReason] = useState('');
   const [viewMonth, setViewMonth] = useState(thisMonth);
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedSlot, setSelectedSlot] = useState('');
@@ -41,6 +43,7 @@ export function Reschedule({ appointment, onClose, onDone }: RescheduleProp) {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (step !== 'pick') return;
     let active = true;
     setLoading(true);
     setSelectedSlot('');
@@ -57,7 +60,7 @@ export function Reschedule({ appointment, onClose, onDone }: RescheduleProp) {
     return () => {
       active = false;
     };
-  }, [appointment.branchId, selectedDate]);
+  }, [step, appointment.branchId, selectedDate]);
 
   const monthLabel = viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const cells = buildMonthCells(viewMonth);
@@ -76,7 +79,8 @@ export function Reschedule({ appointment, onClose, onDone }: RescheduleProp) {
         email: appointment.email,
         phone: appointment.phone,
         reason: appointment.reason,
-        rescheduleReference: appointment.reference
+        rescheduleReference: appointment.reference,
+        rescheduleReason: reason.trim()
       });
       onDone();
     } catch (failure) {
@@ -84,6 +88,25 @@ export function Reschedule({ appointment, onClose, onDone }: RescheduleProp) {
       setSaving(false);
     }
   };
+
+  if (step === 'reason') {
+    return <div className="reschedule-overlay" onClick={onClose}>
+        <div className="reschedule-modal" role="dialog" aria-modal="true" aria-labelledby="reschedule-title" onClick={event => event.stopPropagation()}>
+          <h2 id="reschedule-title">Reschedule Appointment</h2>
+          <p className="reschedule-current">
+            Current: <strong>{formatDay(appointment.dateKey, 'long')} at {appointment.slot}</strong><br />
+            {appointment.branchName}
+          </p>
+          <label className="reschedule-reason">Why do you need to reschedule? *
+            <textarea value={reason} maxLength={300} onChange={event => setReason(event.target.value)} placeholder="Tell us briefly why you need a new date or time" />
+          </label>
+          <div className="reschedule-actions">
+            <button type="button" className="dash-outline" onClick={onClose}>Close</button>
+            <button type="button" className="dash-primary" disabled={!reason.trim()} onClick={() => setStep('pick')}>Continue</button>
+          </div>
+        </div>
+      </div>;
+  }
 
   return <div className="reschedule-overlay" onClick={onClose}>
       <div className="reschedule-modal" role="dialog" aria-modal="true" aria-labelledby="reschedule-title" onClick={event => event.stopPropagation()}>
@@ -109,21 +132,20 @@ export function Reschedule({ appointment, onClose, onDone }: RescheduleProp) {
 
         <div>
           <strong>Available times for {formatDay(toDateKey(selectedDate), 'short')}</strong>
-          <div className = "reschedule-slots">
-            {loading ? <p className = "reschedule-note">Loading times…</p> : slots.length === 0 ? <p className = "reschedule-note">No times available on this day.</p> : slots.map(slot => <button
+          <div className="reschedule-slots">
+            {loading ? <p className="reschedule-note">Loading times…</p> : slots.length === 0 ? <p className="reschedule-note">No times available on this day.</p> : slots.map(slot => <button
                 type="button"
-                key = {slot.label}
-                disabled = {slot.state === 'unavailable'}
-                className = {selectedSlot === slot.label ? 'reschedule-slot selected' : 'reschedule-slot'}
-                onClick = {() => setSelectedSlot(current => (current === slot.label ? '' : slot.label))}
+                key={slot.label}
+                disabled={slot.state === 'unavailable'}
+                className={selectedSlot === slot.label ? 'reschedule-slot selected' : 'reschedule-slot'}
+                onClick={() => setSelectedSlot(current => (current === slot.label ? '' : slot.label))}
               >{selectedSlot === slot.label && <Check size={12} />} {slot.label}</button>)}
           </div>
         </div>
-        
-        {error && <p className = "reschedule-error" role="alert">{error}</p>}
-        <div className = "reschedule-actions">
-          <button type = "button" className = "dash-outline" onClick = {onClose}>Close</button>
-          <button type = "button" className = "dash-primary" disabled = {!selectedSlot || saving} onClick={submit}>{saving ? 'Saving…' : 'Confirm Reschedule'}</button>
+        {error && <p className="reschedule-error" role="alert">{error}</p>}
+        <div className="reschedule-actions">
+          <button type="button" className="dash-outline" onClick={() => setStep('reason')}><ArrowLeft size={13} /> Back</button>
+          <button type="button" className="dash-primary" disabled={!selectedSlot || saving} onClick={submit}>{saving ? 'Saving…' : 'Confirm Reschedule'}</button>
         </div>
       </div>
     </div>;

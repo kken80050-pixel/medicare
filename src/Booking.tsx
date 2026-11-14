@@ -166,9 +166,9 @@ return <main className="booking-page">
       event.preventDefault();
       goForward();
     }}>
-            <label>Full Name *<input required value={details.fullName} onChange={event => updateDetail('fullName', event.target.value)} placeholder="Your full name" /></label>
-            <label>Email Address * <small>(For appointment updates)</small><input type="email" required value={details.email} onChange={event => updateDetail('email', event.target.value)} placeholder="you@email.com" /></label>
-            <label>Contact Number *<input required type="tel" inputMode="numeric" pattern="[0-9]{10,11}" maxLength={11} value={details.phone} onChange={event => updateDetail('phone', event.target.value.replace(/\D/g, ''))} placeholder="09170000000" title="Enter 10 to 11 digits, numbers only" /></label>
+            <label><span>Full Name <span className="required-mark">*</span></span><input required readOnly aria-readonly="true" className="locked-field" value={details.fullName} placeholder="Your full name" /></label>
+            <label><span>Email Address <span className="required-mark">*</span></span><small>(For appointment updates)</small><input type="email" required readOnly aria-readonly="true" className="locked-field" value={details.email} placeholder="you@email.com" /></label>
+            <label><span>Contact Number <span className="required-mark">*</span></span><input required type="tel" inputMode="numeric" pattern="[0-9]{10,11}" maxLength={11} value={details.phone} onChange={event => updateDetail('phone', event.target.value.replace(/\D/g, ''))} placeholder="09170000000" title="Enter 10 to 11 digits, numbers only" /></label>
             <label>Reason for Appointment <small>(Optional)</small><textarea value={details.reason} onChange={event => updateDetail('reason', event.target.value)} placeholder="Tell us briefly why you are visiting" /></label>
             <div className="wizard-actions"><button type="button" className="secondary-button" onClick={goBack}><ArrowLeft size={13} /> Back</button><button type="submit" className="primary-button">Continue <span aria-hidden="true">→</span></button></div>
           </form>
@@ -265,6 +265,10 @@ return <main className="booking-page">
 .details-form { display: grid; gap: 10px; }
 .details-form label { display: grid; gap: 5px; color: #263444; font-size: 14px; font-weight: 700; }
 .details-form label small { color: #73808d; font-size: 12px; font-weight: 400; }
+
+.required-mark { color: #d92d20; margin-left: 2px; }
+.details-form input.locked-field { background: #f1f5f9; color: #64748b; cursor: not-allowed; }
+.details-form input.locked-field:focus { border-color: #dce4e8; box-shadow: none; }
 
 input, textarea { width: 100%; border: 1px solid #dce4e8; border-radius: 5px; outline: none; color: #334153; background: #fff; font-size: 12px; }
 input { height: 31px; padding: 0 9px; } textarea { min-height: 57px; padding: 8px 9px; resize: vertical; font-family: inherit; }

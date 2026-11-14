@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useBranches } from './BranchProvide';
 import { cancelAppointment, fetchAppointment, formatDay, statusOf } from './AppointmentsStore';
 import type { Appointment } from './AppointmentsStore';
 import './Dashboard.css';
 import { ConfirmDialog } from './ConfirmDialog';
+import { Reschedule } from './Reschedule';
 
 export function AppointmentDetails() {
   const { reference } = useParams();
   const navigate = useNavigate();
-  const { branches } = useBranches();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [rescheduling, setRescheduling] = useState(false);
 
   useEffect(() => {
     if (!reference) return;
@@ -32,11 +32,6 @@ const cancel = async () => {
     window.alert('Could not cancel the appointment. Please try again.');
   }
 };
-
-  const reschedule = () => {
-    const branch = branches.find(entry => entry.id === appointment.branchId);
-    navigate('/book', { state: { branch, reschedule: appointment.reference } });
-  };
 
   return <div className="medicare-dashboard medicare-details">
       <div className="dash-details-wrap">
@@ -60,13 +55,15 @@ const cancel = async () => {
             <strong>{appointment.fullName}</strong>
             <span>Email: {appointment.email} | Phone: {appointment.phone}</span>
             <span>Visit Notes: {appointment.reason || 'No reason provided'}</span>
+          {appointment.rescheduledFrom && <span>Rescheduled from #{appointment.rescheduledFrom}: {appointment.rescheduleReason}</span>}
           </div>
-          {status === 'Requested' && <div className="dash-actions dash-details-actions">
-              <button type="button" className="dash-primary" onClick={reschedule}>Reschedule Appointment</button>
+          {['Requested', 'Upcoming'].includes(status) && <div className="dash-actions dash-details-actions">
+              <button type="button" className="dash-primary" onClick={() => setRescheduling(true)}>Reschedule Appointment</button>
               <button type="button" className="dash-danger" onClick={() => setConfirmOpen(true)}>Cancel Appointment</button>
             </div>}
         </section>
       </div>
+      {rescheduling && <Reschedule appointment={appointment} onClose={() => setRescheduling(false)} onDone={() => navigate('/dashboard')}/>}
 
       <ConfirmDialog
         open={confirmOpen}
@@ -74,9 +71,13 @@ const cancel = async () => {
         confirmLabel="Yes, cancel appointment"
         cancelLabel="Keep appointment"
         onConfirm={cancel}
-        onCancel={() => setConfirmOpen(false)}
-      >
-        Ref <strong>#{appointment.reference}</strong> on <strong>{formatDay(appointment.dateKey, 'long')}</strong> at <strong>{appointment.slot}</strong>. This can't be undone.
+        onCancel={() => setConfirmOpen(false)}>
+        <div className="cancel-details">
+          <p><span>Ref</span><strong>#{appointment.reference}</strong></p>
+          <p><span>Date</span><strong>{formatDay(appointment.dateKey, 'long')}</strong></p>
+          <p><span>Time</span><strong>{appointment.slot}</strong></p>
+          <p className="cancel-warning">This can't be undone.</p>
+        </div>
       </ConfirmDialog>
     </div>;
 }
