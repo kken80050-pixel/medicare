@@ -66,7 +66,6 @@ const confirmCancel = async () => {
 };
 
 const visibleDoctors = doctors.filter(item => item.active && (doctorBranch === 'all' || item.branchId === doctorBranch));
-const contact = user?.phone || appointments.filter(item => item.phone).slice(-1)[0]?.phone;
 
 const reschedule = (item: Appointment) => setToReschedule(item);
 
@@ -94,7 +93,7 @@ return <div className="medicare-dashboard">
           <span title={user?.email}>{user?.email}</span>
         </div>
       </div>
-      {contact && <div className="profile-row"><Phone size={13} /> {contact}</div>}
+
       <button type="button" className="dash-outline" onClick={() => setEditing(true)}><Pencil size={13} /> Edit Profile</button>
       <button type = "button" className = "dash-logout" onClick = {() => setAskLogout(true)}>Log Out</button>
     </div>
