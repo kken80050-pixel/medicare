@@ -97,8 +97,8 @@ export function Reschedule({ appointment, onClose, onDone }: RescheduleProps) {
             Current: <strong>{formatDay(appointment.dateKey, 'long')} at {appointment.slot}</strong><br />
             {appointment.branchName}
           </p>
-          <label className="reschedule-reason">Why do you need to reschedule? *
-            <textarea value={reason} maxLength={300} onChange={event => setReason(event.target.value)} placeholder="Tell us briefly why you need a new date or time" />
+          <label className="reschedule-reason"><span>Why do you need to reschedule? <span className="required-mark">*</span></span>
+            <textarea value={reason} maxLength={300} onChange={event => setReason(event.target.value)} placeholder="Enter your Reason for Rescheduling" />
           </label>
           <div className="reschedule-actions">
             <button type="button" className="dash-outline" onClick={onClose}>Close</button>
