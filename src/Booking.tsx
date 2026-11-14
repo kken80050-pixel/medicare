@@ -57,6 +57,7 @@ export function Booking() {
     phone: user?.phone ?? '',
     reason: ''
   });
+  const phoneLocked = Boolean(user?.phone);
 
   useEffect(() => {
   if (user?.phone) {
@@ -168,7 +169,7 @@ return <main className="booking-page">
     }}>
             <label><span>Full Name <span className="required-mark">*</span></span><input required readOnly aria-readonly="true" className="locked-field" value={details.fullName} placeholder="Your full name" /></label>
             <label><span>Email Address <span className="required-mark">*</span></span><small>(For appointment updates)</small><input type="email" required readOnly aria-readonly="true" className="locked-field" value={details.email} placeholder="you@email.com" /></label>
-            <label><span>Contact Number <span className="required-mark">*</span></span><input required type="tel" inputMode="numeric" pattern="[0-9]{10,11}" maxLength={11} value={details.phone} onChange={event => updateDetail('phone', event.target.value.replace(/\D/g, ''))} placeholder="09170000000" title="Enter 10 to 11 digits, numbers only" /></label>
+            <label><span>Contact Number <span className="required-mark">*</span></span>{phoneLocked && <small></small>}<input required type="tel" inputMode="numeric" pattern="[0-9]{10,11}" maxLength={11} readOnly={phoneLocked} aria-readonly={phoneLocked} className={phoneLocked ? 'locked-field' : undefined} value={details.phone} onChange={event => updateDetail('phone', event.target.value.replace(/\D/g, ''))} placeholder="09170000000" title="Enter 10 to 11 digits, numbers only" /></label>
             <label>Reason for Appointment <small>(Optional)</small><textarea value={details.reason} onChange={event => updateDetail('reason', event.target.value)} placeholder="Tell us briefly why you are visiting" /></label>
             <div className="wizard-actions"><button type="button" className="secondary-button" onClick={goBack}><ArrowLeft size={13} /> Back</button><button type="submit" className="primary-button">Continue <span aria-hidden="true">→</span></button></div>
           </form>
